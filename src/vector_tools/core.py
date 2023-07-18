@@ -7,10 +7,17 @@ def distance(vertices: np.ndarray) -> np.ndarray:
     v = np.diff(vertices, axis=0)
     return np.linalg.norm(v)
 
-def angle(vertices: np.ndarray, degree=True) -> float:
-    pi = np.inner(vertices[0], vertices[1])
-    cs = np.clip(pi, -1, 1) # fix rounding issue.
+def angle(vertices: np.ndarray, degree: bool=True) -> float:
+    vertices /= np.linalg.norm(vertices, axis=1, keepdims=True)
+    ip = np.inner(vertices[0], vertices[1])
+    cs = np.clip(ip, -1, 1) # fix rounding issue.
     rads = np.arccos(cs)
+    return np.rad2deg(rads) if degree else rads
+
+def cotangent(vertices: np.ndarray, degree: bool=True) -> float:
+    ip = np.inner(vertices[0], vertices[1]) 
+    cp = np.cross(vertices[0], vertices[1])
+    rads = ip/np.linalg.norm(cp)
     return np.rad2deg(rads) if degree else rads
 
 def triangle_area(lengths: np.ndarray) -> float:
