@@ -7,6 +7,8 @@ class BiPoint:
         self.vertices = vertices if isinstance(vertices, np.ndarray) else np.vstack(vertices)
         self._norms = np.linalg.norm(self.vertices, axis=1, keepdims=True) 
         self._normed = self.vertices / self._norms
+        self._ip = np.inner(self.vertices[0], self.vertices[1]) 
+        self._cp = np.cross(self.vertices[0], self.vertices[1]) 
 
     def get_midpoint(self) -> np.ndarray:
         return np.sum(self.vertices, axis=0)/2.
@@ -22,9 +24,10 @@ class BiPoint:
         return np.rad2deg(rads) if degree else rads
 
     def get_cotangent(self) -> float:
-        ip = np.inner(self.vertices[0], self.vertices[1]) 
-        cp = np.cross(self.vertices[0], self.vertices[1])
-        return ip/np.linalg.norm(cp)
+        return self._ip/np.linalg.norm(self._cp)
+    
+    def get_cosecant(self) -> float:
+        return np.prod(self._norms)/np.linalg.norm(self._cp)
     
     @classmethod
     def angle(cls, vertices, **kwargs):
@@ -41,6 +44,10 @@ class BiPoint:
     @classmethod
     def cotangent(cls, vertices):
         return cls(vertices).get_cotangent()
+    
+    @classmethod
+    def cosecant(cls, vertices):
+        return cls(vertices).get_cosecant()
     
 class TriPoint:
 
@@ -74,6 +81,9 @@ class TriPoint:
     def get_cotangent(self) -> float:
         return BiPoint.cotangent(self._vectors)
     
+    def get_cosecant(self) -> float:
+        return BiPoint.cosecant(self._vectors)
+    
     def get_is_collinear(self) -> bool:
         n = self.get_normal(normalize=False)
         return np.allclose(n, 0)
@@ -98,6 +108,20 @@ class TriPoint:
         a, b, c = self._lengths[0], self._lengths[1], self._lengths[2]
         return self.get_area()/2. if (a**2+c**2 < b**2) else self.get_area()/4.
 
+    def get_barycenter(self) -> np.ndarray:
+        return np.mean(self.vertices, axis=0)
+    
+    def get_barycentric_coords(self, point: np.ndarray) -> np.ndarray:
+        p, r, q = self.vertices[0], self.vertices[1], self.vertices[2] 
+        coords = np.array([TriPoint.area((point, q, r)), TriPoint.area((point, p, q)), TriPoint.area((point, p, r))])
+        coords /= np.sum(coords)
+        return coords
+    
+    def get_barycentric_interp(self, values):
+        bary = self.get_barycenter()
+        coords = self.get_barycentric_coords(bary)
+        return np.inner(values, coords)
+    
     @classmethod
     def is_collinear(cls, vertices):
         return cls(vertices).get_is_collinear()
@@ -109,3 +133,7 @@ class TriPoint:
     @classmethod
     def area(cls, vertices):
         return cls(vertices).get_area()
+    
+    @classmethod
+    def barycentric_interp(cls, vertices, *args, **kwargs):
+        return cls(vertices).get_barycentric_interp(*args, **kwargs)
