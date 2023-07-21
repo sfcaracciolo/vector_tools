@@ -117,7 +117,7 @@ class TriPoint:
         coords /= np.sum(coords)
         return coords
     
-    def get_barycentric_interp(self, values):
+    def get_barycentric_interp(self, values: np.ndarray) -> float:
         bary = self.get_barycenter()
         coords = self.get_barycentric_coords(bary)
         return np.inner(values, coords)
