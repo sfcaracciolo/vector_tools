@@ -24,5 +24,6 @@ On the other hand, TriPoint class has several methods related to triangle operat
 * **get_barycentric_region()** *is the area between the barycenter, p0 and the midpoints of the incident edges to p0*
 * **get_voronoi_region()** *is the area between the circumcenter, p0 and the midpoints of the incident edges to p0*
 * **get_mixed_voronoi_region()** *same as voronoi region but check if triangle is obtuse*
-
+* and more ...
+  
 The BiPoint methods are implemented too, considering vertices p1-p0 and p2-p0.
