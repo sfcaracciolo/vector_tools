@@ -125,6 +125,10 @@ class TriPoint:
     @classmethod
     def is_collinear(cls, vertices):
         return cls(vertices).get_is_collinear()
+
+    @classmethod
+    def barycenter(cls, vertices):
+        return cls(vertices).get_barycenter()
     
     @classmethod
     def normal(cls, vertices, **kwargs):
