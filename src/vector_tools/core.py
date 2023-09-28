@@ -88,11 +88,11 @@ class TriPoint:
         n = self.get_normal(normalize=False)
         return np.allclose(n, 0)
     
-    def get_is_obtuse(self) -> bool:
+    def get_is_obtuse(self) -> Tuple[bool,bool,bool]:
         # https://mathworld.wolfram.com/LawofCosines.html
         # https://mathworld.wolfram.com/ObtuseTriangle.html
         a, b, c = self._lengths[0], self._lengths[1], self._lengths[2] 
-        return (a**2+c**2 < b**2) or (a**2+b**2 < c**2) or (b**2+c**2 < a**2)
+        return (a**2+c**2 < b**2), (a**2+b**2 < c**2), (b**2+c**2 < a**2)
     
     def get_barycentric_region(self) -> float:
         return self.get_area()/3. 
@@ -104,9 +104,9 @@ class TriPoint:
     
     def get_mixed_voronoi_region(self) -> float:
         # http://rodolphe-vaillant.fr/entry/20/compute-harmonic-weights-on-a-triangular-mesh#mixed_voro_area
-        if not self.get_is_obtuse(): return self.get_voronoi_region()
-        a, b, c = self._lengths[0], self._lengths[1], self._lengths[2]
-        return self.get_area()/2. if (a**2+c**2 < b**2) else self.get_area()/4.
+        obts = self.get_is_obtuse()
+        if not any(obts): return self.get_voronoi_region()
+        return self.get_area()/2. if obts[0] else self.get_area()/4.
 
     def get_barycenter(self) -> np.ndarray:
         return np.mean(self.vertices, axis=0)
